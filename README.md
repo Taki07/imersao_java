@@ -35,3 +35,8 @@ A proposta da aula é de desenvolver um gerador de figurinhas explorando outras 
 5.  Colocar outra fonte como a Comic Sans ou a Impact, a fonte usada em memes.<br>
 6.  Colocar uma imagem de você que está fazendo esse curso sorrindo, fazendo joinha!<br>
 8.  Tratar as imagens retornadas pela API do IMDB para pegar uma imagem maior ao invés dos thumbnails. Opções: pegar a URL da imagem e remover o trecho mostrado durante a aula ou consumir o endpoint de posters da API do IMDB (mais trabalhoso), tratando o JSON retornado.<br>
+<br>
+Outra melhoria implementada é que o gerador de figurinhas vai sempre redimensionar a imagem final, deixando todas as figurinhas padronizadas no tamanho 600x1000, não importando assim o tamanho da imagem original recebida pelo JSON<br>
+<br>
+
+![image](https://user-images.githubusercontent.com/48402366/179863270-cf35a8cc-4c86-4a7a-b8db-fd6dbac198e7.png)
