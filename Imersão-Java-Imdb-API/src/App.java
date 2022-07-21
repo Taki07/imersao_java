@@ -1,15 +1,9 @@
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -28,64 +22,87 @@ public class App {
             }
 
     
-    // Pegar os dados do banco de dados do Imdb com http
-    
-    // Top 250 filmes
-        // String url = "https://imdb-api.com/en/API/Top250Movies/"; - correção devido à instabilidade na API original
-        //    URI endereço = URI.create(url + APIKey.Chave); - correção devido à instabilidade na API original
-            String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java/api/TopMovies.json";
-            URI endereço = URI.create(url);
-                HttpClient client = HttpClient.newHttpClient();
-                HttpRequest request = HttpRequest.newBuilder(endereço).GET().build();
-                HttpResponse<String> resposta =client.send(request, BodyHandlers.ofString());
-                    String retorno = resposta.body();
-                
-    // Melhores séries
-    //    String url2 = "https://imdb-api.com/en/API/MostPopularTVs/"; - correção devido à instabilidade na API original
-    //    URI endereço2 = URI.create(url2 + APIKey.Chave); - correção devido à instabilidade na API original
-        String url2 = "https://raw.githubusercontent.com/alura-cursos/imersao-java/api/MostPopularTVs.json";
-        URI endereço2 = URI.create(url2);
-                request = HttpRequest.newBuilder(endereço2).GET().build();
-                HttpResponse<String> resposta2 = client.send(request, BodyHandlers.ofString());
-                    String  retorno2 = resposta2.body();
-                
-    // Tratar os dados vindos do site por Json (título, poster, classificação)
-     JsonParser parser = new JsonParser();
-        List<Map<String, String>> Lista = parser.parse(retorno);
-        List<Map<String, String>> Lista2 = parser.parse(retorno2);
-    
-    // Visualização dos dados obtidos pelo site
+    // Chamar as classes construtoras
+        ContentExtractor extractor = new ContentExtractor();
+        var http = new ClientHttp();
         var stickermaker = new StickerMaker();
+        // Pegar os dados do banco de dados do Imdb com http
 
-            for (Map<String,String> filme : Lista) {
-
-                String linkfilme = filme.get("image");
-                InputStream inputfilme = new URL(linkfilme).openStream();
-                String nomefilmeraw = (filme.get("title")+".png");
-                String nomefilme = nomefilmeraw.replace(":", " -");
-                System.out.println(nomefilme);
+    // Top 250 filmes
+    //  String topfilmes = "https://imdb-api.com/en/API/Top250Movies/"+APIKey.ChaveimDb; - correção devido à instabilidade na API original
+        
+        String topfilmes = "https://raw.githubusercontent.com/alura-cursos/imersao-java/api/TopMovies.json";
             
-                stickermaker.generate(inputfilme, nomefilme);
+    // API Astronomic Picture of the Day - Nasa    
+        String nasaApod = "https://api.nasa.gov/planetary/apod?api_key=";
+        String argumentsnasa = "&start_date=2022-06-12&end_date=2022-06-14";
+        String urlnasa = nasaApod+APIKey.ChaveNasa+argumentsnasa;
+                        
+    // Melhores séries
+    //  String topseries = "https://imdb-api.com/en/API/MostPopularTVs/"+APIKey.ChaveimDb; - correção devido à instabilidade na API original
+        String topseries = "https://raw.githubusercontent.com/alura-cursos/imersao-java/api/MostPopularTVs.json";
+    
+        
+          
 
-                System.out.println("\u001b[1m Nome: " + filme.get("title")+ " \u001b[0m");
-                System.out.println("\u001b[3m Pôster: " + filme.get("image")); //+ "\u001b[0m");
-                System.out.println("\u001b[45m Nota imDb: " + filme.get("imDbRating")+ "⭐" + "\u001b[0m");
-                System.out.println();
+    // Tratar os dados vindos do site por Json (título, poster, classificação)
+        
+    String nasajson = http.searchData(urlnasa);
+    String topfilmesjson = http.searchData(topfilmes);
+    String topseriesjson = http.searchData(topseries);
+    
+    // Visualização dos dados obtidos pelas APIs
+        
+        List<NasaContent> nasa = extractor.extractcontentnasa(nasajson);
+            
+        for (int index = 0; index < 3; index++) {
+            
+            NasaContent nasacontent = nasa.get(index);
+            InputStream stream = new URL(nasacontent.getUrlimagem()).openStream();
+            String stickernasaraw = nasacontent.getTitulo()+nasacontent.getDate()+".png";
+            var stickernasa = stickernasaraw.replace(":", " - ");
+            stickermaker.generate(stream, stickernasa);
+            System.out.println(nasacontent.getTitulo());
+            System.out.println(nasacontent.getDate());
+            System.out.println("Gerando foto "+ stickernasa);
         }
-                for (Map<String,String> serie : Lista2) {
+    
+        List<ImdbContent> imdbfilmes = extractor.extractcontentimdb(topfilmesjson);
+
+        for (int index = 0; index < 3; index++) {
+
+            ImdbContent filmeContent = imdbfilmes.get(index);
+            InputStream streamfilme = new URL(filmeContent.getUrlimagem()).openStream();
+            String stickerfilmeraw = filmeContent.getTitulo()+ ".png";
+            String stickerfilme = stickerfilmeraw.replace(":", " - ");
+            stickermaker.generate(streamfilme, stickerfilme);
+            System.out.println("\u001b[1m Nome: " + filmeContent.getTitulo()+ " \u001b[0m");
+            System.out.println("\u001b[3m Pôster: " + filmeContent.getUrlimagem() + "\u001b[0m");
+            System.out.println("\u001b[45m Nota imDb: " + filmeContent.getRating()+ "⭐" + "\u001b[0m");
+            System.out.println();           
+        }
+
+        List<ImdbContent> imdbseries = extractor.extractcontentimdb(topseriesjson);
+
+        for (int index = 0; index < 3; index++) {
+
+            ImdbContent seriesContent = imdbseries.get(index);
+            InputStream streamseries = new URL(seriesContent.getUrlimagem()).openStream();
+            String stickerseriesraw = seriesContent.getTitulo()+ ".png";
+            String stickerseries = stickerseriesraw.replace(":", " - ");
+            stickermaker.generate(streamseries, stickerseries);   
+            System.out.println("\u001b[1m Nome:" + seriesContent.getTitulo() + "\u001b[0m");
+            System.out.println("\u001b[3m Pôster:" + seriesContent.getUrlimagem() + "\u001b[0m");
+            System.out.println("\u001b[45m Nota imDb:" + seriesContent.getRating()+ "⭐" +  "\u001b[0m");
+            System.out.println();         
+        }
+   
+
+
+
+                     
+                       
                     
-                    String linkserie = serie.get("image");
-                    InputStream inputserie = new URL(linkserie).openStream();
-                    String nomeserieraw = (serie.get("title")+ ".png");
-                    String nomeserie = nomeserieraw.replace(":", " -");
-                    stickermaker.generate(inputserie, nomeserie);
-
-                    System.out.println("\u001b[1m Nome:" + serie.get("title") + "\u001b[0m");
-                    System.out.println("\u001b[3m Pôster:" + serie.get("image")); // + "\u001b[0m");
-                    System.out.println("\u001b[45m Nota imDb:" + serie.get("imDbRating")+ "⭐" +  "\u001b[0m");
-                    System.out.println();
-                }
-
     // Exportar os dados como Stickers pra Wpp, Telegram
 
     

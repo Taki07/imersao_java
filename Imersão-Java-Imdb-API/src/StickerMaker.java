@@ -42,7 +42,7 @@ public class StickerMaker {
         BufferedImage imgselo = ImageIO.read(selo);
         graphics.drawImage(imgselo, 250, 750, null);
         var texto = "Selo Taki de Qualidade";
-        graphics.drawString(texto, 70, 970);
+        graphics.drawString(texto, 90, 970);
         // tentativa de Outline - falhou
         //  TextLayout tl = new TextLayout(texto,fonte,graphics.getFontRenderContext());
         //  Shape shape = tl.getOutline(null);
