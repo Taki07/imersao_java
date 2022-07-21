@@ -43,6 +43,8 @@ Outra melhoria implementada é que o gerador de figurinhas vai sempre redimensio
 
 
 <h2 align="center"> Dia 3<h2>
-Nesta aula aproveitamos para melhorar nosso código com as refatorações necessárias para torná-lo mais flexível e fácil de entender, além de adicionar mais APIs para receber dados e gerar figurinhas.
+Nesta aula aproveitamos para melhorar nosso código com as refatorações necessárias para torná-lo mais flexível e fácil de entender, além de adicionar mais APIs para receber dados e gerar figurinhas.<br>
 
 ![image](https://user-images.githubusercontent.com/48402366/180294263-b0acc5d8-ac57-4a3f-b58d-8d16f3de5fc5.png)
+<br>
+<br>
